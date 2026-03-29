@@ -1,0 +1,31 @@
+# cloudbuild.yaml
+# Builds a Docker image, pushes to GCR, and deploys to Cloud Run
+
+steps:
+  # Step 1: Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/project-nodeapp-docker:latest', '.']
+
+  # Step 2: Push Docker image to GCR
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/project-nodeapp-docker:latest']
+
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'gcloud'
+    args:
+      [
+        'run', 'deploy', 'project-nodeapp-docker',           # Cloud Run service name
+        '--image', 'gcr.io/$PROJECT_ID/project-nodeapp-docker:latest',
+        '--platform', 'managed',
+        '--region', 'us-central1',                            # <-- change to your preferred region
+        '--service-account', '503184524416-compute@developer.gserviceaccount.com',
+        '--allow-unauthenticated'
+      ]
+
+# Send logs only to Cloud Logging to avoid logs_bucket errors
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - 'gcr.io/$PROJECT_ID/project-nodeapp-docker:latest'
