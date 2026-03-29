@@ -24,16 +24,20 @@ steps:
       'run', 'deploy', 'project-nodeapp-docker',
       '--image', 'asia-south1-docker.pkg.dev/$PROJECT_ID/project-nodeapp-docker/project-nodeapp-docker:latest',
       '--platform', 'managed',
-      '--region', '${_REGION}',                        # Substitution variable
+      '--region', '${_REGION}',
       '--service-account', '503184524416-compute@developer.gserviceaccount.com',
       '--allow-unauthenticated',
-      '--set-env-vars',
-      'MONGO_URI=mongodb+srv://admin:admin@nodeappcrud.hck03x6.mongodb.net/sample_mflix?appName=nodeappCRUD,ENV=production,JWT_SECRET=12345qwerty54321'
+      '--set-env-vars', 'ENV=development',
+      '--set-secrets', 'JWT_SECRET=projects/$PROJECT_ID/secrets/JWT_SECRET:latest,MONGO_URI=projects/$PROJECT_ID/secrets/MONGO_URI:latest'
     ]
+
+# Top-level options
+options:
+  logging: CLOUD_LOGGING_ONLY   # Fixes the "build.service_account" logs issue
 
 # Optional: Timeout if your build takes longer
 timeout: '1200s'  # 20 minutes
 
-# Substitutions (variables you can override in trigger)
+# Substitutions (you can override in trigger)
 substitutions:
   _REGION: 'asia-south1'
